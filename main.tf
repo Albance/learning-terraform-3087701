@@ -92,7 +92,7 @@ module "blog_alb" {
 
 #########################################
 # Auto Scaling Group (ASG) for EC2 fleet
-#########################################
+########################################
 module "blog_autoscaling" {
   source  = "terraform-aws-modules/autoscaling/aws"
   version = "6.5.2"
