@@ -1,3 +1,10 @@
+provider "aws" {
+  region = "us-east-1" # Change to your desired region
+}
+
+########################
+# Data Sources
+########################
 
 data "aws_ami" "app_ami" {
   most_recent = true
@@ -23,14 +30,18 @@ data "aws_vpc" "default" {
   default = true
 }
 
+########################
+# VPC
+########################
+
 module "blog_vpc" {
   source = "terraform-aws-modules/vpc/aws"
 
   name = "dev"
   cidr = "10.0.0.0/16"
 
-  azs             = data.aws_availability_zones.available.names
-  public_subnets  = ["10.0.101.0/24", "10.0.102.0/24", "10.0.103.0/24"]
+  azs            = data.aws_availability_zones.available.names
+  public_subnets = ["10.0.101.0/24", "10.0.102.0/24", "10.0.103.0/24"]
 
   tags = {
     Terraform   = "true"
@@ -38,20 +49,26 @@ module "blog_vpc" {
   }
 }
 
+########################
+# Security Group
+########################
+
 module "blog_sg" {
   source  = "terraform-aws-modules/security-group/aws"
   version = "5.3.0"
-  
-  vpc_id = module.blog_vpc.vpc_id
 
-  name = "blog"
+  vpc_id = module.blog_vpc.vpc_id
+  name   = "blog"
+
   ingress_rules       = ["http-80-tcp"]
   ingress_cidr_blocks = ["0.0.0.0/0"]
   egress_rules        = ["all-all"]
   egress_cidr_blocks  = ["0.0.0.0/0"]
 }
 
-# Autoscaling Module
+########################
+# Auto Scaling Group
+########################
 
 module "autoscaling" {
   source  = "terraform-aws-modules/autoscaling/aws"
@@ -77,13 +94,9 @@ module "autoscaling" {
   }
 }
 
-resource "aws_autoscaling_attachment" "asg_attachment" {
-  autoscaling_group_name = module.autoscaling.autoscaling_group_name
-  alb_target_group_arn   = module.blog_alb.target_groups["ex-instance"].arn
-}
-
-
-
+########################
+# ALB Module
+########################
 
 module "blog_alb" {
   source = "terraform-aws-modules/alb/aws"
@@ -106,17 +119,4 @@ module "blog_alb" {
 
   target_groups = {
     ex-instance = {
-      name_prefix = "blog"
-      protocol    = "HTTP"
-      port        = 80
-      target_type = "instance"
-      target_id   = aws_instance.blog.id
-    }
-  }
-
-  tags = {
-    Environment = "dev"
-  }
-
-  depends_on = [aws_instance.blog]
-}
+      name_prefix = "blog_
