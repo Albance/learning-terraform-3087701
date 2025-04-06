@@ -1,5 +1,5 @@
 variable "instance_type" {
-  description = "EC2 instance type"
+  description = "EC2 instance type for the Auto Scaling Group"
   type        = string
-  default     = "t3.micro" # Change if needed
+  default     = "t3.micro"
 }

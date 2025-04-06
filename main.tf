@@ -91,11 +91,12 @@ module "autoscaling" {
 }
 
 ########################
-# ALB Module
+# Application Load Balancer
 ########################
 
 module "blog_alb" {
-  source = "terraform-aws-modules/alb/aws"
+  source  = "terraform-aws-modules/alb/aws"
+  version = "9.15.0"
 
   name            = "blog-alb"
   vpc_id          = module.blog_vpc.vpc_id
@@ -115,4 +116,25 @@ module "blog_alb" {
 
   target_groups = {
     ex-instance = {
-      name_prefix = "blog_
+      name_prefix = "blog"
+      protocol    = "HTTP"
+      port        = 80
+      target_type = "instance"
+    }
+  }
+
+  tags = {
+    Environment = "dev"
+  }
+
+  depends_on = [module.autoscaling]
+}
+
+########################
+# ASG → ALB Attachment
+########################
+
+resource "aws_autoscaling_attachment" "asg_attachment" {
+  autoscaling_group_name = module.autoscaling.autoscaling_group_name
+  target_group_arn        = module.blog_alb.target_groups["ex-instance"].arn
+}
