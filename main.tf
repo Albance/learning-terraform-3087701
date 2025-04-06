@@ -57,20 +57,22 @@ module "autoscaling" {
   source  = "terraform-aws-modules/autoscaling/aws"
   version = "8.2.0"
 
-  name                 = "blog"
-  min_size             = 1
-  max_size             = 2
-  desired_capacity     = 1
+  name               = "blog"
+  min_size           = 1
+  max_size           = 2
+  desired_capacity   = 1
 
-  vpc_zone_identifier  = module.blog_vpc.public_subnets
-  security_groups      = [module.blog_sg.security_group_id]
+  vpc_zone_identifier = module.blog_vpc.public_subnets
+  security_groups     = [module.blog_sg.security_group_id]
 
   create_launch_template = true
   launch_template_name   = "blog-launch-template"
-  image_id               = data.aws_ami.app_ami.id
-  instance_type          = var.instance_type
 
-  target_group_arns      = [module.alb.target_groups["ex-instance"].arn]
+  image_id      = data.aws_ami.app_ami.id
+  instance_type = var.instance_type
+
+  create_attachment = true
+  alb_target_group_arns = [module.alb.target_groups["ex-instance"].arn]
 
   tags = {
     Name        = "blog-asg"
