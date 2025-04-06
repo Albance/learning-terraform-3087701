@@ -51,35 +51,33 @@ module "blog_sg" {
   egress_cidr_blocks  = ["0.0.0.0/0"]
 }
 
+#Autoscaling Module
+
 module "autoscaling" {
   source  = "terraform-aws-modules/autoscaling/aws"
   version = "8.2.0"
 
-  name               = "blog"
-  min_size           = 1
-  max_size           = 2
-  desired_capacity   = 1
+  name                 = "blog"
+  min_size             = 1
+  max_size             = 2
+  desired_capacity     = 1
 
-  vpc_zone_identifier = module.blog_vpc.public_subnets
-  security_groups     = [module.blog_sg.security_group_id]
+  vpc_zone_identifier  = module.blog_vpc.public_subnets
+  security_groups      = [module.blog_sg.security_group_id]
 
   create_launch_template = true
   launch_template_name   = "blog-launch-template"
+  image_id               = data.aws_ami.app_ami.id
+  instance_type          = var.instance_type
 
-  image_id       = data.aws_ami.app_ami.id
-  instance_type  = var.instance_type
-
-  load_balancers = [
-    {
-      target_group_arn = module.alb.target_groups["ex-instance"].arn
-    }
-  ]
+  target_group_arns      = [module.alb.target_groups["ex-instance"].arn]
 
   tags = {
     Name        = "blog-asg"
     Environment = "dev"
   }
 }
+
 
 
 
