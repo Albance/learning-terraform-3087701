@@ -66,14 +66,6 @@ module "blog_alb" {
   subnets         = module.blog_vpc.public_subnets
   security_groups = [module.blog_sg.security_group_id]
 
-  # ✅ Ensure deletion protection is disabled
-  load_balancer_attributes = [
-    {
-      key   = "deletion_protection.enabled"
-      value = "false"
-    }
-  ]
-
   # Register EC2 instances to this target group
   target_groups = [
     {
