@@ -51,7 +51,7 @@ module "blog_sg" {
   egress_cidr_blocks  = ["0.0.0.0/0"]
 }
 
-#Autoscaling Module
+# Autoscaling Module
 
 module "autoscaling" {
   source  = "terraform-aws-modules/autoscaling/aws"
@@ -71,8 +71,8 @@ module "autoscaling" {
   image_id      = data.aws_ami.app_ami.id
   instance_type = var.instance_type
 
-  create_attachment = true
-  alb_target_group_arns = [module.alb.target_groups["ex-instance"].arn]
+  # Removed create_attachment
+  target_group_arns = [module.alb.target_groups["ex-instance"].arn]
 
   tags = {
     Name        = "blog-asg"
