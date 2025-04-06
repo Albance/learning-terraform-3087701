@@ -71,13 +71,15 @@ module "autoscaling" {
   image_id      = data.aws_ami.app_ami.id
   instance_type = var.instance_type
 
-  # Removed create_attachment
-  target_group_arns = [module.alb.target_groups["ex-instance"].arn]
-
   tags = {
     Name        = "blog-asg"
     Environment = "dev"
   }
+}
+
+resource "aws_autoscaling_attachment" "asg_attachment" {
+  autoscaling_group_name = module.autoscaling.autoscaling_group_name
+  alb_target_group_arn   = module.blog_alb.target_groups["ex-instance"].arn
 }
 
 
